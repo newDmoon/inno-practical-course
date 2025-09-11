@@ -1,4 +1,5 @@
-import org.example.util.CustomLinkedList;
+package org.innowise.util.impl;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    void testAddFirst(){
+    void testAddFirst() {
         list.addFirst(123);
         assertEquals(list.getFirst(), 123);
         assertEquals(list.getLast(), 123);
@@ -27,7 +28,7 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    void testAddLast(){
+    void testAddLast() {
         list.addLast(123);
         assertEquals(list.getFirst(), 123);
         assertEquals(list.getLast(), 123);
@@ -53,7 +54,7 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    void testRemoveFirst(){
+    void testRemoveFirst() {
         list.addFirst(124);
         list.addFirst(123);
         list.removeFirst();
@@ -65,7 +66,7 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    void testRemoveLast(){
+    void testRemoveLast() {
         list.addLast(124);
         list.addLast(123);
         list.removeLast();
@@ -77,7 +78,7 @@ public class CustomLinkedListTest {
     }
 
     @Test
-    void testRemoveByIndex(){
+    void testRemoveByIndex() {
         list.addLast(123);
         list.addLast(124);
         list.addLast(125);

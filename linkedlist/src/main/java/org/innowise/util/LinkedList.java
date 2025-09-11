@@ -1,4 +1,4 @@
-package org.example.util;
+package org.innowise.util;
 
 public interface LinkedList<E> {
     int size();

@@ -1,4 +1,6 @@
-package org.example.util;
+package org.innowise.util.impl;
+
+import org.innowise.util.LinkedList;
 
 import java.util.NoSuchElementException;
 
@@ -84,7 +86,7 @@ public class CustomLinkedList<E> implements LinkedList<E> {
      * Adds the element in the list by index.
      *
      * @param index index of the list to add
-     * @param el element to add
+     * @param el    element to add
      * @throws IndexOutOfBoundsException if index is out of bounds
      */
     @Override
@@ -93,7 +95,7 @@ public class CustomLinkedList<E> implements LinkedList<E> {
             throw new IndexOutOfBoundsException(index);
         }
 
-        if (index == 0){
+        if (index == 0) {
             addFirst(el);
         } else if (index == size) {
             addLast(el);
