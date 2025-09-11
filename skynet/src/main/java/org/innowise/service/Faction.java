@@ -1,11 +1,14 @@
-package org.example.service;
+package org.innowise.service;
 
 import lombok.Getter;
-import org.example.model.Part;
+import org.innowise.model.Part;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CyclicBarrier;
 import java.util.logging.Logger;
 
 /**
@@ -38,8 +41,12 @@ public class Faction implements Runnable {
     /** Total number of robots built by this faction */
     @Getter
     private int robotsBuilt = 0;
+    private final CyclicBarrier dayBarrier;
+    private final CyclicBarrier nightBarrier;
 
-    public Faction(String title, BlockingQueue<Part> storage, final int DAYS, final int MAX_CAPACITY) {
+    public Faction(CyclicBarrier dayBarrier, CyclicBarrier nightBarrier, String title, BlockingQueue<Part> storage, final int DAYS, final int MAX_CAPACITY) {
+        this.dayBarrier = dayBarrier;
+        this.nightBarrier = nightBarrier;
         this.title = title;
         this.storage = storage;
         this.DAYS = DAYS;
@@ -60,8 +67,13 @@ public class Faction implements Runnable {
     public void run() {
         logger.info("Faction  " + title + " is starting");
         try {
-            executeBuildingCycle();
-        } catch (InterruptedException e) {
+            for (int day = 1; day <= DAYS; day++) {
+                dayBarrier.await();
+                collectPartsForDay();
+                buildRobots();
+                nightBarrier.await();
+            }
+        } catch (Exception e) {
             Thread.currentThread().interrupt();
             logger.severe("Faction " + title + " was interrupted " + e);
         } finally {
@@ -104,30 +116,15 @@ public class Faction implements Runnable {
     }
 
     /**
-     * Executes the complete building cycle for all days.
-     * Each day consists of collecting parts and attempting to build robots.
-     *
-     * @throws InterruptedException if the thread is interrupted
-     */
-    private void executeBuildingCycle() throws InterruptedException {
-        for (int day = 1; day <= DAYS; day++) {
-            collectPartsForDay();
-            buildRobots();
-            Thread.sleep(50);
-        }
-    }
-
-    /**
      * Collects parts from the shared storage for the current day.
      * Attempts to collect up to the maximum daily capacity, but stops early if storage is empty.
      */
     private void collectPartsForDay() {
-        for (int i = 0; i < MAX_DAY_CAPACITY; i++) {
-            Part part = storage.poll();
-            if (part == null) {
-                break;
-            }
+        List<Part> drained = new ArrayList<>();
+        storage.drainTo(drained, MAX_DAY_CAPACITY);
+        for (Part part : drained) {
             inventory.merge(part, 1, Integer::sum);
         }
+        logger.fine("Faction " + title + " collected " + drained.size() + " parts");
     }
 }

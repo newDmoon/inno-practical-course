@@ -1,4 +1,4 @@
-package org.example.model;
+package org.innowise.model;
 
 public enum Part {
     HEAD,

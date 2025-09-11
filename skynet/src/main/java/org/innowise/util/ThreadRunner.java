@@ -1,10 +1,11 @@
-package org.example.util;
+package org.innowise.util;
 
-import org.example.model.Part;
-import org.example.service.Faction;
-import org.example.service.Factory;
+import org.innowise.model.Part;
+import org.innowise.service.Faction;
+import org.innowise.service.Factory;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class ThreadRunner {
     private static final int MAX_PARTS_PER_DAY = 10;
     private static final int DAYS = 100;
     private static final int MAX_CARRY_COUNT = 5;
-    private static final int THREAD_POOL_SIZE = 3;
+    private static final int THREAD_CONT = 3;
 
     /**
      * Executes the complete simulation of robot production competition.
@@ -40,12 +41,14 @@ public class ThreadRunner {
      * </p>
      */
     public void runSimulation() {
-        Factory factory = new Factory(DAYS, MAX_PARTS_PER_DAY);
+        CyclicBarrier dayBarrier = new CyclicBarrier(THREAD_CONT);
+        CyclicBarrier nightBarrier = new CyclicBarrier(THREAD_CONT);
+        Factory factory = new Factory(dayBarrier, nightBarrier, DAYS, MAX_PARTS_PER_DAY);
         BlockingQueue<Part> storage = factory.getStorage();
-        Faction worldFaction = new Faction("World", storage, DAYS, MAX_CARRY_COUNT);
-        Faction wednesdayFaction = new Faction("Wednesday", storage, DAYS, MAX_CARRY_COUNT);
+        Faction worldFaction = new Faction(dayBarrier, nightBarrier, "World", storage, DAYS, MAX_CARRY_COUNT);
+        Faction wednesdayFaction = new Faction(dayBarrier, nightBarrier, "Wednesday", storage, DAYS, MAX_CARRY_COUNT);
 
-        ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_CONT);
 
         submitTasks(executor, factory, worldFaction, wednesdayFaction);
 
