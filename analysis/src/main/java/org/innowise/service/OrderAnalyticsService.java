@@ -1,7 +1,7 @@
-package org.example.service;
+package org.innowise.service;
 
-import org.example.model.Customer;
-import org.example.model.Order;
+import org.innowise.model.Customer;
+import org.innowise.model.Order;
 
 import java.math.BigDecimal;
 import java.util.List;

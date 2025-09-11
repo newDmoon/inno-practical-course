@@ -1,9 +1,10 @@
-package org.example.service;
+package org.innowise.service.impl;
 
-import org.example.model.Customer;
-import org.example.model.Order;
-import org.example.model.OrderItem;
-import org.example.model.OrderStatus;
+import org.innowise.model.Customer;
+import org.innowise.model.Order;
+import org.innowise.model.OrderItem;
+import org.innowise.model.OrderStatus;
+import org.innowise.service.OrderAnalyticsService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     private static final String ORDERS_LIST_IS_NULL = "orders list is null";
     private static final int ROUNDING_SCALE = 2;
+    private static final int MIN_ORDER_COUNT = 5;
 
     /**
      * Returns the list of unique cities where orders came from.
@@ -71,7 +73,7 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
      *
      * @param orders list of orders
      * @return product name with the highest total quantity
-     * @throws NullPointerException if orders is null
+     * @throws NullPointerException   if orders is null
      * @throws NoSuchElementException if there are no shipped or delivered orders
      */
     @Override
@@ -106,28 +108,26 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     public BigDecimal getAvgCheckForDeliveredOrders(List<Order> orders) {
         Objects.requireNonNull(orders, ORDERS_LIST_IS_NULL);
 
-        List<BigDecimal> checks = orders.stream()
+        return orders.stream()
                 .filter(Objects::nonNull)
-                .filter(order -> order.getStatus().equals(OrderStatus.DELIVERED))
+                .filter(order -> order.getStatus() == OrderStatus.DELIVERED)
                 .map(order -> Optional.ofNullable(order.getItems()).orElse(List.of()).stream()
                         .filter(Objects::nonNull)
                         .map(item -> BigDecimal.valueOf(item.getPrice())
                                 .multiply(BigDecimal.valueOf(item.getQuantity())))
                         .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .filter(check -> check.compareTo(BigDecimal.ZERO) > 0)
-                .toList();
-
-        if (!checks.isEmpty()) {
-            return checks.stream()
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .divide(BigDecimal.valueOf(checks.size()), ROUNDING_SCALE, RoundingMode.HALF_UP);
-        }
-
-        return BigDecimal.ZERO;
+                .collect(Collectors.teeing(
+                        Collectors.reducing(BigDecimal.ZERO, BigDecimal::add),
+                        Collectors.counting(),
+                        (sum, count) -> count > 0 ?
+                                sum.divide(BigDecimal.valueOf(count), ROUNDING_SCALE, RoundingMode.HALF_UP) :
+                                BigDecimal.ZERO
+                ));
     }
 
     /**
-     * Returns a list of customers who have more than 5 orders.
+     * Returns a list of customers who have more than {@link #MIN_ORDER_COUNT} orders.
      *
      * @param orders list of orders
      * @return list of customers with more than 5 orders, possibly empty
@@ -143,7 +143,7 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(customer -> customer, Collectors.counting()))
                 .entrySet().stream()
-                .filter(entry -> entry.getValue() > 5)
+                .filter(entry -> entry.getValue() > MIN_ORDER_COUNT)
                 .map(Map.Entry::getKey)
                 .toList();
     }

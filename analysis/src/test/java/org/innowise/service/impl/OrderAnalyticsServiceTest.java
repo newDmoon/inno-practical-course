@@ -1,9 +1,11 @@
-import org.example.model.Category;
-import org.example.model.Customer;
-import org.example.model.Order;
-import org.example.model.OrderItem;
-import org.example.model.OrderStatus;
-import org.example.service.OrderAnalyticsServiceImpl;
+package org.innowise.service.impl;
+
+import org.innowise.model.Category;
+import org.innowise.model.Customer;
+import org.innowise.model.Order;
+import org.innowise.model.OrderItem;
+import org.innowise.model.OrderStatus;
+import org.innowise.service.impl.OrderAnalyticsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

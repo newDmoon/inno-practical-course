@@ -1,4 +1,4 @@
-package org.example.model;
+package org.innowise.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
