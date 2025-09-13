@@ -12,6 +12,8 @@
 
     <modules>
         <module>skynet</module>
+        <module>analysis</module>
+        <module>linkedlist</module>
     </modules>
 
     <build>
